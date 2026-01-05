@@ -8,9 +8,7 @@ plugins {
 
 android {
     namespace = "com.survivalcoding.runningtracker"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.survivalcoding.runningtracker"
@@ -77,6 +75,14 @@ android {
 }
 
 dependencies {
+    // Google Maps dependencies (Only for google flavor)
+//    "googleImplementation"(libs.play.services.maps)
+//    "googleImplementation"("com.google.maps.android:maps-compose:6.4.0")
+
+    // Naver Maps dependencies (Only for naver flavor)
+    "naverImplementation"("com.naver.maps:map-sdk:3.19.1")
+    "naverImplementation"("io.github.fornewid:naver-map-compose:1.9.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

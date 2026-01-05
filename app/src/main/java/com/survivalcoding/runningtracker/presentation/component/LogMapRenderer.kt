@@ -1,4 +1,4 @@
-package com.survivalcoding.runningtracker.presentation
+package com.survivalcoding.runningtracker.presentation.component
 
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth

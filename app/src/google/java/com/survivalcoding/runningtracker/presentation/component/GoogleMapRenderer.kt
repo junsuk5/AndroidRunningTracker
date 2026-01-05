@@ -1,4 +1,4 @@
-package com.survivalcoding.runningtracker.presentation
+package com.survivalcoding.runningtracker.presentation.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,17 +12,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
 
-class NaverMapRenderer : MapRenderer {
+class GoogleMapRenderer : MapRenderer {
     @Composable
     override fun DrawMap(pathPoints: List<LocationPoint>) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF03C75A).copy(alpha = 0.2f)), // Naver Green
+                .background(Color(0xFF34A853).copy(alpha = 0.2f)), // Google Green
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Naver Maps Ready\nPoints: ${pathPoints.size}",
+                text = "Google Maps Ready\nPoints: ${pathPoints.size}",
                 color = Color.White,
                 modifier = Modifier.padding(16.dp)
             )

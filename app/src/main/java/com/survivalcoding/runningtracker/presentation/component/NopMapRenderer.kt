@@ -1,4 +1,4 @@
-package com.survivalcoding.runningtracker.presentation
+package com.survivalcoding.runningtracker.presentation.component
 
 import androidx.compose.runtime.Composable
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
