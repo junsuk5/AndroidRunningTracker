@@ -46,6 +46,7 @@ android {
     }
 
     flavorDimensions += "environment"
+    flavorDimensions += "sdk"
     productFlavors {
         create("dev") {
             dimension = "environment"
@@ -62,6 +63,15 @@ android {
         create("prod") {
             dimension = "environment"
             buildConfigField("String", "BASE_URL", "\"https://api.runningtracker.com\"")
+        }
+
+        create("google") {
+            dimension = "sdk"
+            buildConfigField("String", "MAP_TYPE", "\"google\"")
+        }
+        create("naver") {
+            dimension = "sdk"
+            buildConfigField("String", "MAP_TYPE", "\"naver\"")
         }
     }
 }
