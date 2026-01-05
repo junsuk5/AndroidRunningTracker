@@ -11,8 +11,11 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.survivalcoding.runningtracker.MainActivity
 import com.survivalcoding.runningtracker.R
+import org.koin.android.ext.android.inject
 
 class TrackingService : Service() {
+
+    private val trackingManager: TrackingManager by inject()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -21,7 +24,7 @@ class TrackingService : Service() {
             ACTION_START -> startForegroundService()
             ACTION_STOP -> stopForegroundService()
         }
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     private fun startForegroundService() {
@@ -49,9 +52,11 @@ class TrackingService : Service() {
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
+        trackingManager.updateTrackingState(true)
     }
 
     private fun stopForegroundService() {
+        trackingManager.updateTrackingState(false)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

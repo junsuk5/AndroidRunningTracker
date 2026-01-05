@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.survivalcoding.runningtracker.domain.model.Run
 import com.survivalcoding.runningtracker.domain.use_case.*
+import com.survivalcoding.runningtracker.presentation.service.TrackingManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -16,7 +17,8 @@ class MainViewModel(
     private val getRunsSortedByAvgSpeedUseCase: GetRunsSortedByAvgSpeedUseCase,
     private val getRunsSortedByCaloriesBurnedUseCase: GetRunsSortedByCaloriesBurnedUseCase,
     private val getTotalStatsUseCase: GetTotalStatsUseCase,
-    private val deleteRunUseCase: DeleteRunUseCase
+    private val deleteRunUseCase: DeleteRunUseCase,
+    private val trackingManager: TrackingManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
@@ -30,15 +32,21 @@ class MainViewModel(
     init {
         getRuns(_state.value.sortType)
         getTotalStats()
+        observeTrackingState()
+    }
+
+    private fun observeTrackingState() {
+        trackingManager.isTracking.onEach { isTracking ->
+            _state.update { it.copy(isTracking = isTracking) }
+        }.launchIn(viewModelScope)
     }
 
     fun onAction(action: MainAction) {
         when (action) {
             is MainAction.ToggleRun -> {
-                val newTrackingState = !_state.value.isTracking
-                _state.update { it.copy(isTracking = newTrackingState) }
+                val currentTrackingState = _state.value.isTracking
                 viewModelScope.launch {
-                    if (newTrackingState) {
+                    if (!currentTrackingState) {
                         _event.emit(MainEvent.StartService)
                     } else {
                         _event.emit(MainEvent.StopService)
@@ -59,7 +67,6 @@ class MainViewModel(
                     _event.emit(MainEvent.RunSaved)
                     _event.emit(MainEvent.StopService)
                 }
-                _state.update { it.copy(isTracking = false) }
             }
             is MainAction.DeleteRun -> {
                 viewModelScope.launch {

@@ -11,12 +11,16 @@ import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByTimeInMi
 import com.survivalcoding.runningtracker.domain.use_case.GetTotalStatsUseCase
 import com.survivalcoding.runningtracker.domain.use_case.SaveRunUseCase
 import com.survivalcoding.runningtracker.presentation.MainViewModel
+import com.survivalcoding.runningtracker.presentation.service.TrackingManager
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
     // Repository
     single<RunRepository> { MockRunRepositoryImpl() }
+
+    // Manager
+    single { TrackingManager() }
 
     // Use Cases
     factory { SaveRunUseCase(get()) }
@@ -31,6 +35,7 @@ val appModule = module {
     // ViewModel
     viewModel {
         MainViewModel(
+            get(),
             get(),
             get(),
             get(),

@@ -1,3 +1,5 @@
+package com.survivalcoding.runningtracker.presentation
+
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
