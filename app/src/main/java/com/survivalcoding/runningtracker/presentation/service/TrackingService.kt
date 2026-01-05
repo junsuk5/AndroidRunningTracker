@@ -11,11 +11,21 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.survivalcoding.runningtracker.MainActivity
 import com.survivalcoding.runningtracker.R
+import com.survivalcoding.runningtracker.domain.location.LocationClient
+import com.survivalcoding.runningtracker.domain.model.LocationPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.koin.android.ext.android.inject
 
 class TrackingService : Service() {
 
     private val trackingManager: TrackingManager by inject()
+    private val locationClient: LocationClient by inject()
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -25,6 +35,11 @@ class TrackingService : Service() {
             ACTION_STOP -> stopForegroundService()
         }
         return START_STICKY
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
     }
 
     private fun startForegroundService() {
@@ -53,6 +68,18 @@ class TrackingService : Service() {
 
         startForeground(NOTIFICATION_ID, notification)
         trackingManager.updateTrackingState(true)
+        startLocationTracking()
+    }
+
+    private fun startLocationTracking() {
+        locationClient.getLocationUpdates(1000L) // 1초 간격
+            .onEach { point ->
+                trackingManager.addPathPoint(point)
+                // 임의의 거리 계산 (실제로는 이전 좌표와의 거리 누적)
+                // 여기서는 간단히 좌표가 들어올 때마다 1미터씩 증가한다고 가정하거나 생략 가능
+                // trackingManager.updateDistance(...)
+            }
+            .launchIn(serviceScope)
     }
 
     private fun stopForegroundService() {

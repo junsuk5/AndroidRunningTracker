@@ -2,6 +2,7 @@ package com.survivalcoding.runningtracker
 
 import android.app.Application
 import com.survivalcoding.runningtracker.core.di.appModule
+import com.survivalcoding.runningtracker.core.di.flavorModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -13,7 +14,10 @@ class RunningTrackerApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@RunningTrackerApplication)
-            modules(appModule)
+            modules(
+                appModule,
+                flavorModule,
+            )
         }
     }
 }

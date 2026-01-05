@@ -39,6 +39,18 @@ class MainViewModel(
         trackingManager.isTracking.onEach { isTracking ->
             _state.update { it.copy(isTracking = isTracking) }
         }.launchIn(viewModelScope)
+
+        trackingManager.distanceInMeters.onEach { distance ->
+            if (_state.value.isTracking) {
+                _state.update { it.copy(currentDistanceInMeters = distance) }
+            }
+        }.launchIn(viewModelScope)
+
+        trackingManager.timeInMillis.onEach { time ->
+            if (_state.value.isTracking) {
+                _state.update { it.copy(currentTimeInMillis = time) }
+            }
+        }.launchIn(viewModelScope)
     }
 
     fun onAction(action: MainAction) {
