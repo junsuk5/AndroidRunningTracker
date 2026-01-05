@@ -97,7 +97,7 @@ class NaverMapRenderer : MapRenderer {
                 Box(
                     modifier = Modifier
                         .fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.TopStart
                 ) {
                     Text(
                         text = "Naver Maps Ready\nPoints: ${pathPoints.size}",

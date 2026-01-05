@@ -222,7 +222,7 @@ fun RunItem(
                 RunInfoRow(
                     icon = Icons.Default.History,
                     label = "Distance",
-                    value = "${run.distanceInMeters / 1000f} km"
+                    value = String.format("%.1f km", run.distanceInMeters / 1000f)
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spacing.tiny))
                 RunInfoRow(
@@ -234,7 +234,7 @@ fun RunItem(
                 RunInfoRow(
                     icon = Icons.Default.Speed,
                     label = "Avg Speed",
-                    value = "${run.avgSpeedInKMH} km/h"
+                    value = String.format("%.1f km/h", run.avgSpeedInKMH)
                 )
             }
             IconButton(
@@ -308,7 +308,7 @@ fun TrackingOverlay(
             ) {
                 TrackingInfoItem(
                     label = "Distance",
-                    value = "${trackingState.distanceInMeters / 1000f} km"
+                    value = String.format("%.1f km", trackingState.distanceInMeters / 1000f)
                 )
                 VerticalDivider(
                     modifier = Modifier.height(32.dp),
