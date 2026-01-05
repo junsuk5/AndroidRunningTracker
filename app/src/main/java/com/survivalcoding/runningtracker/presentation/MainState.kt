@@ -9,5 +9,6 @@ data class MainState(
     val currentTimeInMillis: Long = 0L,
     val currentAvgSpeedInKMH: Float = 0f,
     val currentCaloriesBurned: Int = 0,
-    val pathPoints: List<List<Pair<Double, Double>>> = emptyList() // List of Polylines
+    val pathPoints: List<List<Pair<Double, Double>>> = emptyList(), // List of Polylines
+    val sortType: SortType = SortType.DATE
 )

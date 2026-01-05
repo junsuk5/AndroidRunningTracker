@@ -26,10 +26,9 @@ class MainViewModel(
     val event: SharedFlow<MainEvent> = _event.asSharedFlow()
 
     private var getRunsJob: Job? = null
-    private var currentSortType = SortType.DATE
 
     init {
-        getRuns(currentSortType)
+        getRuns(_state.value.sortType)
         getTotalStats()
     }
 
@@ -60,9 +59,9 @@ class MainViewModel(
                 }
             }
             is MainAction.ChangeSortType -> {
-                if (currentSortType != action.sortType) {
-                    currentSortType = action.sortType
-                    getRuns(currentSortType)
+                if (_state.value.sortType != action.sortType) {
+                    _state.update { it.copy(sortType = action.sortType) }
+                    getRuns(action.sortType)
                 }
             }
         }
