@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.survivalcoding.runningtracker.core.util.TimeFormatter
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
 import com.survivalcoding.runningtracker.domain.model.Run
 import com.survivalcoding.runningtracker.presentation.component.MapRenderer
@@ -54,7 +55,6 @@ import com.survivalcoding.runningtracker.presentation.designsystem.RunningTracke
 import com.survivalcoding.runningtracker.presentation.service.TrackingState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import java.util.concurrent.TimeUnit
 
 @Composable
 fun MainScreen(
@@ -227,7 +227,7 @@ fun RunItem(
                 RunInfoRow(
                     icon = Icons.Default.Timer,
                     label = "Time",
-                    value = formatTime(run.timeInMillis)
+                    value = TimeFormatter.formatTime(run.timeInMillis)
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spacing.tiny))
                 RunInfoRow(
@@ -315,7 +315,7 @@ fun TrackingOverlay(
                 )
                 TrackingInfoItem(
                     label = "Time",
-                    value = formatTime(trackingState.timeInMillis)
+                    value = TimeFormatter.formatTime(trackingState.timeInMillis)
                 )
             }
 
@@ -354,13 +354,6 @@ fun TrackingInfoItem(
             fontWeight = FontWeight.Bold
         )
     }
-}
-
-fun formatTime(ms: Long): String {
-    val hrs = TimeUnit.MILLISECONDS.toHours(ms)
-    val mins = TimeUnit.MILLISECONDS.toMinutes(ms) % 60
-    val secs = TimeUnit.MILLISECONDS.toSeconds(ms) % 60
-    return String.format("%02d:%02d:%02d", hrs, mins, secs)
 }
 
 @Preview(showBackground = true)

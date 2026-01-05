@@ -9,9 +9,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import android.location.Location
 import com.survivalcoding.runningtracker.MainActivity
 import com.survivalcoding.runningtracker.R
+import com.survivalcoding.runningtracker.core.util.TrackingCalculator
 import com.survivalcoding.runningtracker.domain.location.LocationClient
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +55,8 @@ class TrackingService : Service() {
     }
 
     private fun startForegroundService() {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(notificationManager)
@@ -91,7 +92,7 @@ class TrackingService : Service() {
             while (true) {
                 lapTime = System.currentTimeMillis() - timeStarted
                 trackingManager.updateTime(totalTime + lapTime)
-                kotlinx.coroutines.delay(50L)
+                delay(50L)
             }
         }
     }
@@ -101,21 +102,19 @@ class TrackingService : Service() {
         locationJob = locationClient.getLocationUpdates(1000L) // 1초 간격
             .onEach { point ->
                 lastLocation?.let { last ->
-                    val distance = FloatArray(1)
-                    Location.distanceBetween(
+                    val distance = TrackingCalculator.calculateDistance(
                         last.latitude, last.longitude,
-                        point.latitude, point.longitude,
-                        distance
+                        point.latitude, point.longitude
                     )
-                    distanceInMeters += distance[0].toInt()
+                    distanceInMeters += distance.toInt()
                     trackingManager.updateDistance(distanceInMeters)
 
                     // Calculate average speed in KMH
-                    val totalTimeInSeconds = (totalTime + lapTime) / 1000f
-                    if (totalTimeInSeconds > 0) {
-                        val speedInKMH = (distanceInMeters / totalTimeInSeconds) * 3.6f
-                        trackingManager.updateAvgSpeed(speedInKMH)
-                    }
+                    val speedInKMH = TrackingCalculator.calculateAvgSpeed(
+                        distanceInMeters,
+                        totalTime + lapTime
+                    )
+                    trackingManager.updateAvgSpeed(speedInKMH)
                 }
                 lastLocation = point
                 trackingManager.addPathPoint(point)
