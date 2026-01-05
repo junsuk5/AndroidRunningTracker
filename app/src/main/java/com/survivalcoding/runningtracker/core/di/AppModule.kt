@@ -3,6 +3,7 @@ package com.survivalcoding.runningtracker.core.di
 import com.survivalcoding.runningtracker.data.repository.MockRunRepositoryImpl
 import com.survivalcoding.runningtracker.domain.repository.RunRepository
 import com.survivalcoding.runningtracker.domain.use_case.DeleteRunUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByAvgSpeedUseCase
 import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByCaloriesBurnedUseCase
 import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByDateUseCase
 import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByDistanceUseCase
@@ -22,6 +23,7 @@ val appModule = module {
     factory { GetRunsSortedByDateUseCase(get()) }
     factory { GetRunsSortedByDistanceUseCase(get()) }
     factory { GetRunsSortedByTimeInMillisUseCase(get()) }
+    factory { GetRunsSortedByAvgSpeedUseCase(get()) }
     factory { GetRunsSortedByCaloriesBurnedUseCase(get()) }
     factory { GetTotalStatsUseCase(get()) }
     factory { DeleteRunUseCase(get()) }

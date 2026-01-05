@@ -94,28 +94,6 @@ fun MainScreen(
                 onFinish = { onAction(MainAction.FinishRun) }
             )
         }
-        
-        // FAB (Show only when NOT tracking)
-        AnimatedVisibility(
-            visible = !state.isTracking,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(AppTheme.spacing.normal)
-        ) {
-            FloatingActionButton(
-                onClick = { onAction(MainAction.ToggleRun) },
-                containerColor = AppTheme.colors.primary,
-                contentColor = AppTheme.colors.onPrimary,
-                shape = CircleShape
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Start Run"
-                )
-            }
-        }
     }
 }
 
