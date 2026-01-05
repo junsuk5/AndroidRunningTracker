@@ -1,0 +1,42 @@
+package com.survivalcoding.runningtracker.core.di
+
+import com.survivalcoding.runningtracker.data.repository.MockRunRepositoryImpl
+import com.survivalcoding.runningtracker.domain.repository.RunRepository
+import com.survivalcoding.runningtracker.domain.use_case.DeleteRunUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByCaloriesBurnedUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByDateUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByDistanceUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByTimeInMillisUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetTotalStatsUseCase
+import com.survivalcoding.runningtracker.domain.use_case.SaveRunUseCase
+import com.survivalcoding.runningtracker.presentation.MainViewModel
+import org.koin.core.module.dsl.viewModel
+import org.koin.dsl.module
+
+val appModule = module {
+    // Repository
+    single<RunRepository> { MockRunRepositoryImpl() }
+
+    // Use Cases
+    factory { SaveRunUseCase(get()) }
+    factory { GetRunsSortedByDateUseCase(get()) }
+    factory { GetRunsSortedByDistanceUseCase(get()) }
+    factory { GetRunsSortedByTimeInMillisUseCase(get()) }
+    factory { GetRunsSortedByCaloriesBurnedUseCase(get()) }
+    factory { GetTotalStatsUseCase(get()) }
+    factory { DeleteRunUseCase(get()) }
+
+    // ViewModel
+    viewModel {
+        MainViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
+}
