@@ -10,4 +10,5 @@ sealed interface MainAction {
     data class ChangeSortType(val sortType: SortType) : MainAction
     data class SelectRun(val run: Run) : MainAction
     data object ToggleGpsStatus : MainAction
+    data object RefreshGpsStatus : MainAction
 }

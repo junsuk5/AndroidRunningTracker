@@ -48,6 +48,7 @@ class MainViewModel(
     val event: SharedFlow<MainEvent> = _event.asSharedFlow()
 
     private var getRunsJob: Job? = null
+    private var gpsStatusJob: Job? = null
 
     init {
         getRuns(_state.value.sortType)
@@ -70,7 +71,8 @@ class MainViewModel(
     }
 
     private fun observeGpsStatus() {
-        gpsStatusProvider.observeGpsStatus().onEach { gpsStatus ->
+        gpsStatusJob?.cancel()
+        gpsStatusJob = gpsStatusProvider.observeGpsStatus().onEach { gpsStatus ->
             _state.update { it.copy(gpsStatus = gpsStatus) }
         }.launchIn(viewModelScope)
     }
@@ -127,7 +129,10 @@ class MainViewModel(
             }
 
             MainAction.ToggleGpsStatus -> {
-                (gpsStatusProvider as? MockGpsStatusProvider)?.toggleStatus()
+                (gpsStatusProvider as? com.survivalcoding.runningtracker.data.location.MockGpsStatusProvider)?.toggleStatus()
+            }
+            MainAction.RefreshGpsStatus -> {
+                observeGpsStatus()
             }
         }
     }

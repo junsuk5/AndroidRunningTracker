@@ -106,6 +106,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+    implementation(libs.play.services.location)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

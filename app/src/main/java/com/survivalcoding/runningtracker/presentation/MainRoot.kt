@@ -74,19 +74,34 @@ fun MainRoot(
     ) { result ->
         val allGranted = result.values.all { it }
         if (allGranted) {
-            // 권한 승인 시 서비스 시작
-            val intent = Intent(context, TrackingService::class.java).apply {
-                action = TrackingService.ACTION_START
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
+            // GPS 상태 즉시 갱신 시도
+            viewModel.onAction(MainAction.RefreshGpsStatus)
+            
+            // 권한 승인 시 서비스 시작 (현재 트래킹 시도 중인 경우에만)
+            if (state.trackingState.isTracking) {
+                val intent = Intent(context, TrackingService::class.java).apply {
+                    action = TrackingService.ACTION_START
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
             }
         } else {
             // 권한 거부 시 경고
             viewModel.onAction(MainAction.ToggleRun) // 트래킹 상태 원복
             // TODO: Snackbar 등으로 안내
+        }
+    }
+
+    // 초기 권한 체크 및 요청
+    LaunchedEffect(Unit) {
+        val hasAllPermissions = permissions.all {
+            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        }
+        if (!hasAllPermissions) {
+            permissionLauncher.launch(permissions.toTypedArray())
         }
     }
 
