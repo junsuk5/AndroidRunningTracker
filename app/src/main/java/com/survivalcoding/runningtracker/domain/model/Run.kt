@@ -1,5 +1,8 @@
 package com.survivalcoding.runningtracker.domain.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 data class Run(
     val id: Int? = null,
     val distanceInMeters: Double = 0.0,

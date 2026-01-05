@@ -2,7 +2,6 @@ package com.survivalcoding.runningtracker.presentation.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -30,9 +29,9 @@ import com.survivalcoding.runningtracker.presentation.designsystem.RunningTracke
 
 @Composable
 fun GpsStatusBadge(
+    modifier: Modifier = Modifier,
     status: GpsStatus,
     onClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
 ) {
     val color: Color
     val text: String
@@ -44,16 +43,19 @@ fun GpsStatusBadge(
             text = "GPS Connected"
             icon = Icons.Default.Map
         }
+
         GpsStatus.Enabled -> {
             color = AppTheme.colors.warning
             text = "Searching GPS..."
             icon = Icons.Default.Refresh
         }
+
         GpsStatus.Lost -> {
             color = AppTheme.colors.error
             text = "GPS Lost"
             icon = Icons.Default.Warning
         }
+
         GpsStatus.Disabled -> {
             color = AppTheme.colors.secondaryText
             text = "GPS Disabled"

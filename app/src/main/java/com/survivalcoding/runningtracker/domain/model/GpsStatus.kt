@@ -1,5 +1,8 @@
 package com.survivalcoding.runningtracker.domain.model
 
+import androidx.compose.runtime.Stable
+
+@Stable
 sealed interface GpsStatus {
     /**
      * GPS가 시스템 설정에서 꺼져 있는 상태

@@ -1,7 +1,9 @@
 package com.survivalcoding.runningtracker.presentation.service
 
+import androidx.compose.runtime.Stable
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
 
+@Stable
 data class TrackingState(
     val isTracking: Boolean = false,
     val pathPoints: List<LocationPoint> = emptyList(),
