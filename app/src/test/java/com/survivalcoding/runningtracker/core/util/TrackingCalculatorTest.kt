@@ -23,15 +23,15 @@ class TrackingCalculatorTest {
     @Test
     fun calculateAvgSpeed_returnsCorrectValue() {
         // 10km in 1 hour = 10 km/h
-        assertEquals(10f, TrackingCalculator.calculateAvgSpeed(10000, 3600000), 0.1f)
+        assertEquals(10f, TrackingCalculator.calculateAvgSpeed(10000.0, 3600000), 0.1f)
 
         // 5km in 30 minutes = 10 km/h
-        assertEquals(10f, TrackingCalculator.calculateAvgSpeed(5000, 1800000), 0.1f)
+        assertEquals(10f, TrackingCalculator.calculateAvgSpeed(5000.0, 1800000), 0.1f)
 
         // 0 distance
-        assertEquals(0f, TrackingCalculator.calculateAvgSpeed(0, 3600000), 0.1f)
+        assertEquals(0f, TrackingCalculator.calculateAvgSpeed(0.0, 3600000), 0.1f)
 
         // 0 time
-        assertEquals(0f, TrackingCalculator.calculateAvgSpeed(10000, 0), 0.1f)
+        assertEquals(0f, TrackingCalculator.calculateAvgSpeed(10000.0, 0), 0.1f)
     }
 }
