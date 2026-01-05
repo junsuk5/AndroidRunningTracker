@@ -109,6 +109,13 @@ class TrackingService : Service() {
                     )
                     distanceInMeters += distance[0].toInt()
                     trackingManager.updateDistance(distanceInMeters)
+
+                    // Calculate average speed in KMH
+                    val totalTimeInSeconds = (totalTime + lapTime) / 1000f
+                    if (totalTimeInSeconds > 0) {
+                        val speedInKMH = (distanceInMeters / totalTimeInSeconds) * 3.6f
+                        trackingManager.updateAvgSpeed(speedInKMH)
+                    }
                 }
                 lastLocation = point
                 trackingManager.addPathPoint(point)

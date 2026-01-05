@@ -44,4 +44,12 @@ class TrackingManager {
             } else it
         }
     }
+
+    fun updateAvgSpeed(speed: Float) {
+        _state.update {
+            if (it.isTracking) {
+                it.copy(avgSpeedInKMH = speed)
+            } else it
+        }
+    }
 }
