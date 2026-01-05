@@ -35,7 +35,15 @@ class MainViewModel(
     fun onAction(action: MainAction) {
         when (action) {
             is MainAction.ToggleRun -> {
-                _state.update { it.copy(isTracking = !it.isTracking) }
+                val newTrackingState = !_state.value.isTracking
+                _state.update { it.copy(isTracking = newTrackingState) }
+                viewModelScope.launch {
+                    if (newTrackingState) {
+                        _event.emit(MainEvent.StartService)
+                    } else {
+                        _event.emit(MainEvent.StopService)
+                    }
+                }
             }
             is MainAction.FinishRun -> {
                 val currentState = _state.value
@@ -49,6 +57,7 @@ class MainViewModel(
                 viewModelScope.launch {
                     saveRunUseCase(run)
                     _event.emit(MainEvent.RunSaved)
+                    _event.emit(MainEvent.StopService)
                 }
                 _state.update { it.copy(isTracking = false) }
             }
