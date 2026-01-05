@@ -9,7 +9,7 @@ import com.survivalcoding.runningtracker.domain.model.Run
 data class RunEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int? = null,
-    val distanceInMeters: Int,
+    val distanceInMeters: Double,
     val timeInMillis: Long,
     val timestamp: Long,
     val avgSpeedInKMH: Float,

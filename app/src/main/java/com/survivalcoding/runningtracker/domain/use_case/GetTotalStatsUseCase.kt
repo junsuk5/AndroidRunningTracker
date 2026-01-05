@@ -8,6 +8,6 @@ class GetTotalStatsUseCase(
 ) {
     fun getTotalTimeInMillis(): Flow<Long> = repository.getTotalTimeInMillis()
     fun getTotalCaloriesBurned(): Flow<Int> = repository.getTotalCaloriesBurned()
-    fun getTotalDistance(): Flow<Int> = repository.getTotalDistance()
+    fun getTotalDistance(): Flow<Double> = repository.getTotalDistance()
     fun getTotalAvgSpeed(): Flow<Float> = repository.getTotalAvgSpeed()
 }

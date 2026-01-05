@@ -237,7 +237,7 @@ fun RunItem(
                 RunInfoRow(
                     icon = Icons.Default.History,
                     label = "Distance",
-                    value = String.format("%.1f km", run.distanceInMeters / 1000f)
+                    value = String.format("%.2f km", run.distanceInMeters / 1000.0)
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spacing.tiny))
                 RunInfoRow(
@@ -323,7 +323,7 @@ fun TrackingOverlay(
             ) {
                 TrackingInfoItem(
                     label = "Distance",
-                    value = String.format("%.1f km", trackingState.distanceInMeters / 1000f)
+                    value = String.format("%.2f km", trackingState.distanceInMeters / 1000.0)
                 )
                 VerticalDivider(
                     modifier = Modifier.height(32.dp),
@@ -445,7 +445,7 @@ fun MainScreenPreview() {
                 runs = listOf(
                     Run(
                         id = 1,
-                        distanceInMeters = 5000,
+                        distanceInMeters = 5000.0,
                         timeInMillis = 1800000,
                         timestamp = System.currentTimeMillis(),
                         avgSpeedInKMH = 10f,
@@ -453,7 +453,7 @@ fun MainScreenPreview() {
                     ),
                     Run(
                         id = 2,
-                        distanceInMeters = 3000,
+                        distanceInMeters = 3000.0,
                         timeInMillis = 1200000,
                         timestamp = System.currentTimeMillis(),
                         avgSpeedInKMH = 9f,
@@ -475,7 +475,7 @@ fun MainScreenTrackingPreview() {
             state = MainState(
                 trackingState = TrackingState(
                     isTracking = true,
-                    distanceInMeters = 1200,
+                    distanceInMeters = 1200.0,
                     timeInMillis = 450000,
                     avgSpeedInKMH = 9.6f
                 )

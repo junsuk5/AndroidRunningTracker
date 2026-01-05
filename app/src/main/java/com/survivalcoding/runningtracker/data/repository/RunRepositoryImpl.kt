@@ -39,8 +39,8 @@ class RunRepositoryImpl(
     override fun getTotalCaloriesBurned(): Flow<Int> =
         runDao.getTotalCaloriesBurned().map { it ?: 0 }
 
-    override fun getTotalDistance(): Flow<Int> =
-        runDao.getTotalDistance().map { it ?: 0 }
+    override fun getTotalDistance(): Flow<Double> =
+        runDao.getTotalDistance().map { it ?: 0.0 }
 
     override fun getTotalAvgSpeed(): Flow<Float> =
         runDao.getTotalAvgSpeed().map { it ?: 0f }

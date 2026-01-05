@@ -23,10 +23,10 @@ object TrackingCalculator {
     /**
      * Calculates the average speed in km/h.
      */
-    fun calculateAvgSpeed(distanceInMeters: Int, timeInMillis: Long): Float {
+    fun calculateAvgSpeed(distanceInMeters: Double, timeInMillis: Long): Float {
         val timeInSeconds = timeInMillis / 1000f
         return if (timeInSeconds > 0) {
-            (distanceInMeters / timeInSeconds) * 3.6f
+            ((distanceInMeters / timeInSeconds) * 3.6).toFloat()
         } else {
             0f
         }

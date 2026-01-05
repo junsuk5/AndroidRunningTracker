@@ -29,7 +29,7 @@ class TrackingManager {
         }
     }
 
-    fun updateDistance(distance: Int) {
+    fun updateDistance(distance: Double) {
         _state.update {
             if (it.isTracking) {
                 it.copy(distanceInMeters = distance)

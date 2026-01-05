@@ -16,7 +16,7 @@ data class MainState(
     val gpsStatus: GpsStatus = GpsStatus.Acquired,
     val trackingState: TrackingState = TrackingState(),
     val selectedRun: Run? = null,
-    val totalDistanceInMeters: Int = 0,
+    val totalDistanceInMeters: Double = 0.0,
     val totalTimeInMillis: Long = 0L,
     val totalAvgSpeedInKMH: Float = 0f,
     val totalCaloriesBurned: Int = 0,

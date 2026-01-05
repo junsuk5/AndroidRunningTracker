@@ -33,7 +33,7 @@ interface RunDao {
     fun getTotalCaloriesBurned(): Flow<Int?>
 
     @Query("SELECT SUM(distanceInMeters) FROM runs")
-    fun getTotalDistance(): Flow<Int?>
+    fun getTotalDistance(): Flow<Double?>
 
     @Query("SELECT AVG(avgSpeedInKMH) FROM runs")
     fun getTotalAvgSpeed(): Flow<Float?>

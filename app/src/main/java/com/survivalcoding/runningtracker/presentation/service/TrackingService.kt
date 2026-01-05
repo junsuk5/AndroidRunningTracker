@@ -37,7 +37,7 @@ class TrackingService : Service() {
     private var totalTime = 0L
 
     private var lastLocation: LocationPoint? = null
-    private var distanceInMeters = 0
+    private var distanceInMeters = 0.0
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -106,7 +106,7 @@ class TrackingService : Service() {
                         last.latitude, last.longitude,
                         point.latitude, point.longitude
                     )
-                    distanceInMeters += distance.toInt()
+                    distanceInMeters += distance
                     trackingManager.updateDistance(distanceInMeters)
 
                     // Calculate average speed in KMH
@@ -130,7 +130,7 @@ class TrackingService : Service() {
         totalTime = 0L
         lapTime = 0L
         lastLocation = null
-        distanceInMeters = 0
+        distanceInMeters = 0.0
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

@@ -15,6 +15,6 @@ interface RunRepository {
 
     fun getTotalTimeInMillis(): Flow<Long>
     fun getTotalCaloriesBurned(): Flow<Int>
-    fun getTotalDistance(): Flow<Int>
+    fun getTotalDistance(): Flow<Double>
     fun getTotalAvgSpeed(): Flow<Float>
 }

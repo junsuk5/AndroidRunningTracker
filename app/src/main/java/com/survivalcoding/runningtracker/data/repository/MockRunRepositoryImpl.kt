@@ -11,10 +11,10 @@ class MockRunRepositoryImpl : RunRepository {
 
     private val _runs = MutableStateFlow<List<Run>>(
         listOf(
-            Run(1, 5000, 1500000L, System.currentTimeMillis() - 86400000L * 3, 12.0f, 400),
-            Run(2, 3000, 900000L, System.currentTimeMillis() - 86400000L * 2, 12.0f, 250),
-            Run(3, 8000, 2400000L, System.currentTimeMillis() - 86400000L * 1, 12.0f, 650),
-            Run(4, 2000, 600000L, System.currentTimeMillis(), 12.0f, 150)
+            Run(1, 5000.0, 1500000L, System.currentTimeMillis() - 86400000L * 3, 12.0f, 400),
+            Run(2, 3000.0, 900000L, System.currentTimeMillis() - 86400000L * 2, 12.0f, 250),
+            Run(3, 8000.0, 2400000L, System.currentTimeMillis() - 86400000L * 1, 12.0f, 650),
+            Run(4, 2000.0, 600000L, System.currentTimeMillis(), 12.0f, 150)
         )
     )
 
@@ -47,7 +47,7 @@ class MockRunRepositoryImpl : RunRepository {
     override fun getTotalCaloriesBurned(): Flow<Int> =
         _runs.map { it.sumOf { r -> r.caloriesBurned } }
 
-    override fun getTotalDistance(): Flow<Int> =
+    override fun getTotalDistance(): Flow<Double> =
         _runs.map { it.sumOf { r -> r.distanceInMeters } }
 
     override fun getTotalAvgSpeed(): Flow<Float> =
