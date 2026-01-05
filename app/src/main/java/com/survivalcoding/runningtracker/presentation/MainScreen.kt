@@ -4,27 +4,29 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.survivalcoding.runningtracker.domain.model.Run
 import com.survivalcoding.runningtracker.presentation.designsystem.AppTheme
 import com.survivalcoding.runningtracker.presentation.designsystem.RunningTrackerTheme
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun MainScreen(
@@ -87,25 +89,32 @@ fun MainScreen(
             exit = fadeOut(),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            TrackingOverlay(state = state)
+            TrackingOverlay(
+                state = state,
+                onFinish = { onAction(MainAction.FinishRun) }
+            )
         }
         
-        // FAB
-        FloatingActionButton(
-            onClick = { 
-                if (state.isTracking) onAction(MainAction.FinishRun) else onAction(MainAction.ToggleRun)
-            },
-            containerColor = AppTheme.colors.primary,
-            contentColor = AppTheme.colors.onPrimary,
-            shape = CircleShape,
+        // FAB (Show only when NOT tracking)
+        AnimatedVisibility(
+            visible = !state.isTracking,
+            enter = fadeIn(),
+            exit = fadeOut(),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(AppTheme.spacing.normal)
         ) {
-            Icon(
-                imageVector = if (state.isTracking) Icons.Default.Stop else Icons.Default.PlayArrow,
-                contentDescription = if (state.isTracking) "Finish Run" else "Start Run"
-            )
+            FloatingActionButton(
+                onClick = { onAction(MainAction.ToggleRun) },
+                containerColor = AppTheme.colors.primary,
+                contentColor = AppTheme.colors.onPrimary,
+                shape = CircleShape
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Start Run"
+                )
+            }
         }
     }
 }
@@ -113,9 +122,19 @@ fun MainScreen(
 @Composable
 fun MapPlaceholder(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.background(AppTheme.colors.surface),
+        modifier = modifier
+            .background(AppTheme.colors.surface)
+            .padding(AppTheme.spacing.normal),
         contentAlignment = Alignment.Center
     ) {
+        Icon(
+            imageVector = Icons.Default.Map,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(0.1f),
+            tint = AppTheme.colors.primary
+        )
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "GPS Map Placeholder",
@@ -125,7 +144,8 @@ fun MapPlaceholder(modifier: Modifier = Modifier) {
             Text(
                 text = "Ready to Track",
                 style = AppTheme.typography.caption,
-                color = AppTheme.colors.primary
+                color = AppTheme.colors.primary,
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -137,22 +157,25 @@ fun SortTypeSelector(
     onSortTypeChange: (SortType) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.tiny)
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.small)
     ) {
         SortType.entries.forEach { sortType ->
             val isSelected = sortType == selectedSortType
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (isSelected) AppTheme.colors.primary else AppTheme.colors.surface)
-                    .clickable { onSortTypeChange(sortType) }
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            Surface(
+                onClick = { onSortTypeChange(sortType) },
+                shape = RoundedCornerShape(20.dp),
+                color = if (isSelected) AppTheme.colors.primary else AppTheme.colors.surface,
+                contentColor = if (isSelected) AppTheme.colors.onPrimary else AppTheme.colors.onSurface,
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
                 Text(
-                    text = sortType.name,
+                    text = sortType.name.replace("_", " "),
                     style = AppTheme.typography.caption,
-                    color = if (isSelected) AppTheme.colors.onPrimary else AppTheme.colors.onSurface
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
         }
@@ -170,7 +193,8 @@ fun RunItem(
             containerColor = AppTheme.colors.surface,
             contentColor = AppTheme.colors.onSurface
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -179,55 +203,149 @@ fun RunItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Distance: ${run.distanceInMeters / 1000f} km", style = AppTheme.typography.body1)
-                Text(text = "Time: ${run.timeInMillis / 1000} s", style = AppTheme.typography.body2, color = AppTheme.colors.secondaryText)
-                Text(text = "Speed: ${run.avgSpeedInKMH} km/h", style = AppTheme.typography.caption)
+                RunInfoRow(
+                    icon = Icons.Default.History,
+                    label = "Distance",
+                    value = "${run.distanceInMeters / 1000f} km"
+                )
+                Spacer(modifier = Modifier.height(AppTheme.spacing.tiny))
+                RunInfoRow(
+                    icon = Icons.Default.Timer,
+                    label = "Time",
+                    value = formatTime(run.timeInMillis)
+                )
+                Spacer(modifier = Modifier.height(AppTheme.spacing.tiny))
+                RunInfoRow(
+                    icon = Icons.Default.Speed,
+                    label = "Avg Speed",
+                    value = "${run.avgSpeedInKMH} km/h"
+                )
             }
-            IconButton(onClick = onDelete) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = AppTheme.colors.error)
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(AppTheme.colors.error.copy(alpha = 0.1f))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = AppTheme.colors.error
+                )
             }
         }
     }
 }
 
 @Composable
-fun TrackingOverlay(state: MainState) {
-    Box(
+fun RunInfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = AppTheme.colors.primary
+        )
+        Spacer(modifier = Modifier.width(AppTheme.spacing.small))
+        Text(
+            text = "$label: ",
+            style = AppTheme.typography.caption,
+            color = AppTheme.colors.secondaryText
+        )
+        Text(
+            text = value,
+            style = AppTheme.typography.body2,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun TrackingOverlay(
+    state: MainState,
+    onFinish: () -> Unit
+) {
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(AppTheme.spacing.normal)
-            .clip(RoundedCornerShape(24.dp))
-            .background(AppTheme.colors.primary.copy(alpha = 0.9f))
-            .padding(AppTheme.spacing.normal)
+            .padding(AppTheme.spacing.normal),
+        shape = RoundedCornerShape(24.dp),
+        color = AppTheme.colors.primary,
+        contentColor = AppTheme.colors.onPrimary,
+        tonalElevation = 8.dp
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .padding(AppTheme.spacing.normal)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(text = "Tracking...", style = AppTheme.typography.caption, color = AppTheme.colors.onPrimary)
-                Text(
-                    text = "${state.currentDistanceInMeters / 1000f} km",
-                    style = AppTheme.typography.h2,
-                    color = AppTheme.colors.onPrimary
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TrackingInfoItem(
+                    label = "Distance",
+                    value = "${state.currentDistanceInMeters / 1000f} km"
+                )
+                VerticalDivider(
+                    modifier = Modifier.height(32.dp),
+                    color = AppTheme.colors.onPrimary.copy(alpha = 0.2f)
+                )
+                TrackingInfoItem(
+                    label = "Time",
+                    value = formatTime(state.currentTimeInMillis)
                 )
             }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "${state.currentTimeInMillis / 1000}s",
-                    style = AppTheme.typography.body1,
-                    color = AppTheme.colors.onPrimary,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "${state.currentAvgSpeedInKMH} km/h",
-                    style = AppTheme.typography.body2,
-                    color = AppTheme.colors.onPrimary
+            
+            // Finish Button integrated into Overlay
+            IconButton(
+                onClick = onFinish,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(AppTheme.colors.onPrimary.copy(alpha = 0.2f))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Stop,
+                    contentDescription = "Finish Run",
+                    tint = AppTheme.colors.onPrimary
                 )
             }
         }
     }
+}
+
+@Composable
+fun TrackingInfoItem(
+    label: String,
+    value: String
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = label,
+            style = AppTheme.typography.caption,
+            color = AppTheme.colors.onPrimary.copy(alpha = 0.8f)
+        )
+        Text(
+            text = value,
+            style = AppTheme.typography.h3,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+fun formatTime(ms: Long): String {
+    val hrs = TimeUnit.MILLISECONDS.toHours(ms)
+    val mins = TimeUnit.MILLISECONDS.toMinutes(ms) % 60
+    val secs = TimeUnit.MILLISECONDS.toSeconds(ms) % 60
+    return String.format("%02d:%02d:%02d", hrs, mins, secs)
 }
 
 @Preview(showBackground = true)
