@@ -9,4 +9,5 @@ sealed interface MainAction {
     data class DeleteRun(val run: Run) : MainAction
     data class ChangeSortType(val sortType: SortType) : MainAction
     data class SelectRun(val run: Run) : MainAction
+    data object ToggleGpsStatus : MainAction
 }

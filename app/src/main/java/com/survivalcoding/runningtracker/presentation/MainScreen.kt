@@ -4,6 +4,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import com.survivalcoding.runningtracker.domain.model.GpsStatus
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -81,7 +86,6 @@ fun MainScreen(
 
             Spacer(modifier = Modifier.height(AppTheme.spacing.normal))
 
-            // Map Area (Renderer)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -90,6 +94,17 @@ fun MainScreen(
                     .background(AppTheme.colors.surface)
             ) {
                 mapRenderer.DrawMap(pathPoints = state.displayPathPoints)
+
+                // GPS Status Badge
+                GpsStatusBadge(
+                    status = state.gpsStatus,
+                    onClick = if (state.isGpsMockingEnabled) {
+                        { onAction(MainAction.ToggleGpsStatus) }
+                    } else null,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(AppTheme.spacing.small)
+                )
             }
 
             Spacer(modifier = Modifier.height(AppTheme.spacing.normal))
@@ -354,6 +369,70 @@ fun TrackingInfoItem(
             style = AppTheme.typography.h3,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+@Composable
+fun GpsStatusBadge(
+    status: GpsStatus,
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+) {
+    val color: Color
+    val text: String
+    val icon: ImageVector
+
+    when (status) {
+        GpsStatus.Acquired -> {
+            color = AppTheme.colors.success
+            text = "GPS Connected"
+            icon = Icons.Default.Map
+        }
+        GpsStatus.Enabled -> {
+            color = AppTheme.colors.warning
+            text = "Searching GPS..."
+            icon = Icons.Default.Refresh
+        }
+        GpsStatus.Lost -> {
+            color = AppTheme.colors.error
+            text = "GPS Lost"
+            icon = Icons.Default.Warning
+        }
+        GpsStatus.Disabled -> {
+            color = AppTheme.colors.secondaryText
+            text = "GPS Disabled"
+            icon = Icons.Default.Block
+        }
+    }
+
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = color.copy(alpha = 0.9f),
+        contentColor = Color.White,
+        modifier = modifier.then(
+            if (onClick != null) {
+                Modifier.clickable { onClick() }
+            } else {
+                Modifier
+            }
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                text = text,
+                style = AppTheme.typography.caption,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

@@ -2,12 +2,30 @@ package com.survivalcoding.runningtracker.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.survivalcoding.runningtracker.data.location.MockGpsStatusProvider
+import com.survivalcoding.runningtracker.domain.location.GpsStatusProvider
 import com.survivalcoding.runningtracker.domain.model.Run
 import com.survivalcoding.runningtracker.domain.model.SortType
-import com.survivalcoding.runningtracker.domain.use_case.*
+import com.survivalcoding.runningtracker.domain.use_case.DeleteRunUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByAvgSpeedUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByCaloriesBurnedUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByDateUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByDistanceUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByTimeInMillisUseCase
+import com.survivalcoding.runningtracker.domain.use_case.GetTotalStatsUseCase
+import com.survivalcoding.runningtracker.domain.use_case.SaveRunUseCase
 import com.survivalcoding.runningtracker.presentation.service.TrackingManager
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainViewModel(
@@ -19,7 +37,8 @@ class MainViewModel(
     private val getRunsSortedByCaloriesBurnedUseCase: GetRunsSortedByCaloriesBurnedUseCase,
     private val getTotalStatsUseCase: GetTotalStatsUseCase,
     private val deleteRunUseCase: DeleteRunUseCase,
-    private val trackingManager: TrackingManager
+    private val trackingManager: TrackingManager,
+    private val gpsStatusProvider: GpsStatusProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
@@ -34,13 +53,25 @@ class MainViewModel(
         getRuns(_state.value.sortType)
         getTotalStats()
         observeTrackingState()
+        observeGpsStatus()
+
+        // GPS Mocking 활성화 여부 설정
+        _state.update {
+            it.copy(isGpsMockingEnabled = gpsStatusProvider is com.survivalcoding.runningtracker.data.location.MockGpsStatusProvider)
+        }
     }
 
     private fun observeTrackingState() {
         trackingManager.state.onEach { trackingState ->
-            _state.update { 
+            _state.update {
                 it.copy(trackingState = trackingState)
             }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun observeGpsStatus() {
+        gpsStatusProvider.observeGpsStatus().onEach { gpsStatus ->
+            _state.update { it.copy(gpsStatus = gpsStatus) }
         }.launchIn(viewModelScope)
     }
 
@@ -57,6 +88,7 @@ class MainViewModel(
                     }
                 }
             }
+
             is MainAction.FinishRun -> {
                 val trackingState = _state.value.trackingState
                 val run = Run(
@@ -73,6 +105,7 @@ class MainViewModel(
                     _event.emit(MainEvent.RunSaved)
                 }
             }
+
             is MainAction.DeleteRun -> {
                 viewModelScope.launch {
                     deleteRunUseCase(action.run)
@@ -81,14 +114,20 @@ class MainViewModel(
                     }
                 }
             }
+
             is MainAction.ChangeSortType -> {
                 if (_state.value.sortType != action.sortType) {
                     _state.update { it.copy(sortType = action.sortType) }
                     getRuns(action.sortType)
                 }
             }
+
             is MainAction.SelectRun -> {
                 _state.update { it.copy(selectedRun = action.run) }
+            }
+
+            MainAction.ToggleGpsStatus -> {
+                (gpsStatusProvider as? MockGpsStatusProvider)?.toggleStatus()
             }
         }
     }

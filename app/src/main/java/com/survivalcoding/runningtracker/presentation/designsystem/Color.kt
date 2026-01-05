@@ -14,7 +14,9 @@ data class RunningTrackerColors(
     val onSurface: Color,
     val secondaryText: Color,
     val accent: Color,
-    val error: Color
+    val error: Color,
+    val success: Color,
+    val warning: Color
 )
 
 val DarkColorPalette = RunningTrackerColors(
@@ -26,7 +28,9 @@ val DarkColorPalette = RunningTrackerColors(
     onSurface = Color(0xFFF1F5F9),
     secondaryText = Color(0xFF94A3B8),
     accent = Color(0xFFFF4081),
-    error = Color(0xFFEF4444)
+    error = Color(0xFFEF4444),
+    success = Color(0xFF10B981), // Emerald Green
+    warning = Color(0xFFF59E0B)  // Amber
 )
 
 val LocalRunningTrackerColors = staticCompositionLocalOf {

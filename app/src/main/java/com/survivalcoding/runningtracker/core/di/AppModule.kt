@@ -1,7 +1,5 @@
 package com.survivalcoding.runningtracker.core.di
 
-import com.survivalcoding.runningtracker.data.repository.MockRunRepositoryImpl
-import com.survivalcoding.runningtracker.domain.repository.RunRepository
 import com.survivalcoding.runningtracker.domain.use_case.DeleteRunUseCase
 import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByAvgSpeedUseCase
 import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByCaloriesBurnedUseCase
@@ -32,6 +30,7 @@ val appModule = module {
     // ViewModel
     viewModel {
         MainViewModel(
+            get(),
             get(),
             get(),
             get(),
