@@ -1,4 +1,12 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
 
 plugins {
     alias(libs.plugins.android.application)
@@ -66,10 +74,14 @@ android {
         create("google") {
             dimension = "sdk"
             buildConfigField("String", "MAP_TYPE", "\"google\"")
+            manifestPlaceholders["MAP_KEY_NAME"] = "com.google.android.geo.API_KEY"
+            manifestPlaceholders["MAP_KEY_VALUE"] = localProperties.getProperty("GOOGLE_MAPS_KEY") ?: ""
         }
         create("naver") {
             dimension = "sdk"
             buildConfigField("String", "MAP_TYPE", "\"naver\"")
+            manifestPlaceholders["MAP_KEY_NAME"] = "com.naver.maps.map.NCP_KEY_ID"
+            manifestPlaceholders["MAP_KEY_VALUE"] = localProperties.getProperty("NAVER_CLIENT_ID") ?: ""
         }
     }
 }
@@ -80,8 +92,7 @@ dependencies {
 //    "googleImplementation"("com.google.maps.android:maps-compose:6.4.0")
 
     // Naver Maps dependencies (Only for naver flavor)
-    "naverImplementation"("com.naver.maps:map-sdk:3.19.1")
-    "naverImplementation"("io.github.fornewid:naver-map-compose:1.9.0")
+    "naverImplementation"("com.naver.maps:map-sdk:3.23.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

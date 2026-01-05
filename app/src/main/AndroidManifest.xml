@@ -18,6 +18,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.RunningTracker">
+
+        <meta-data
+            android:name="${MAP_KEY_NAME}"
+            android:value="${MAP_KEY_VALUE}" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
