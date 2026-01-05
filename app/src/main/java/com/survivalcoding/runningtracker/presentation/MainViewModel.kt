@@ -22,6 +22,9 @@ class MainViewModel(
     private val _state = MutableStateFlow(MainState())
     val state: StateFlow<MainState> = _state.asStateFlow()
 
+    private val _event = MutableSharedFlow<MainEvent>()
+    val event: SharedFlow<MainEvent> = _event.asSharedFlow()
+
     private var getRunsJob: Job? = null
     private var currentSortType = SortType.DATE
 
@@ -46,12 +49,14 @@ class MainViewModel(
                 )
                 viewModelScope.launch {
                     saveRunUseCase(run)
+                    _event.emit(MainEvent.RunSaved)
                 }
                 _state.update { it.copy(isTracking = false) }
             }
             is MainAction.DeleteRun -> {
                 viewModelScope.launch {
                     deleteRunUseCase(action.run)
+                    _event.emit(MainEvent.ShowSnackbar("운동 기록이 삭제되었습니다."))
                 }
             }
             is MainAction.ChangeSortType -> {
