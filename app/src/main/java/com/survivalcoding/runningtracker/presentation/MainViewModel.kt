@@ -58,7 +58,7 @@ class MainViewModel(
 
         // GPS Mocking 활성화 여부 설정
         _state.update {
-            it.copy(isGpsMockingEnabled = gpsStatusProvider is com.survivalcoding.runningtracker.data.location.MockGpsStatusProvider)
+            it.copy(isGpsMockingEnabled = gpsStatusProvider is MockGpsStatusProvider)
         }
     }
 
@@ -129,7 +129,7 @@ class MainViewModel(
             }
 
             MainAction.ToggleGpsStatus -> {
-                (gpsStatusProvider as? com.survivalcoding.runningtracker.data.location.MockGpsStatusProvider)?.toggleStatus()
+                (gpsStatusProvider as? MockGpsStatusProvider)?.toggleStatus()
             }
             MainAction.RefreshGpsStatus -> {
                 observeGpsStatus()
