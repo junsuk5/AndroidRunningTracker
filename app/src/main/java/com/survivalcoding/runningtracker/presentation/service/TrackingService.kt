@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import android.location.Location
 import com.survivalcoding.runningtracker.MainActivity
 import com.survivalcoding.runningtracker.R
 import com.survivalcoding.runningtracker.domain.location.LocationClient
@@ -18,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -33,6 +35,9 @@ class TrackingService : Service() {
     private var timeStarted = 0L
     private var lapTime = 0L
     private var totalTime = 0L
+
+    private var lastLocation: LocationPoint? = null
+    private var distanceInMeters = 0
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -95,6 +100,17 @@ class TrackingService : Service() {
         locationJob?.cancel()
         locationJob = locationClient.getLocationUpdates(1000L) // 1초 간격
             .onEach { point ->
+                lastLocation?.let { last ->
+                    val distance = FloatArray(1)
+                    Location.distanceBetween(
+                        last.latitude, last.longitude,
+                        point.latitude, point.longitude,
+                        distance
+                    )
+                    distanceInMeters += distance[0].toInt()
+                    trackingManager.updateDistance(distanceInMeters)
+                }
+                lastLocation = point
                 trackingManager.addPathPoint(point)
             }
             .launchIn(serviceScope)
@@ -107,6 +123,8 @@ class TrackingService : Service() {
         trackingManager.updateTrackingState(false)
         totalTime = 0L
         lapTime = 0L
+        lastLocation = null
+        distanceInMeters = 0
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

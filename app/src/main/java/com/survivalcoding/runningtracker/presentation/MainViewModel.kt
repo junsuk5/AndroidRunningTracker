@@ -78,7 +78,6 @@ class MainViewModel(
                     if (_state.value.selectedRun?.id == action.run.id) {
                         _state.update { it.copy(selectedRun = null) }
                     }
-                    _event.emit(MainEvent.ShowSnackbar("운동 기록이 삭제되었습니다."))
                 }
             }
             is MainAction.ChangeSortType -> {
