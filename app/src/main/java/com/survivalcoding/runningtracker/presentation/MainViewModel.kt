@@ -49,6 +49,7 @@ class MainViewModel(
                 val isTracking = _state.value.trackingState.isTracking
                 viewModelScope.launch {
                     if (!isTracking) {
+                        _state.update { it.copy(selectedRun = null) }
                         _event.emit(MainEvent.StartService)
                     } else {
                         _event.emit(MainEvent.StopService)
@@ -62,7 +63,8 @@ class MainViewModel(
                     timeInMillis = trackingState.timeInMillis,
                     timestamp = System.currentTimeMillis(),
                     avgSpeedInKMH = trackingState.avgSpeedInKMH,
-                    caloriesBurned = trackingState.caloriesBurned
+                    caloriesBurned = trackingState.caloriesBurned,
+                    pathPoints = trackingState.pathPoints
                 )
                 viewModelScope.launch {
                     _event.emit(MainEvent.StopService)
@@ -73,6 +75,9 @@ class MainViewModel(
             is MainAction.DeleteRun -> {
                 viewModelScope.launch {
                     deleteRunUseCase(action.run)
+                    if (_state.value.selectedRun?.id == action.run.id) {
+                        _state.update { it.copy(selectedRun = null) }
+                    }
                     _event.emit(MainEvent.ShowSnackbar("운동 기록이 삭제되었습니다."))
                 }
             }
@@ -81,6 +86,9 @@ class MainViewModel(
                     _state.update { it.copy(sortType = action.sortType) }
                     getRuns(action.sortType)
                 }
+            }
+            is MainAction.SelectRun -> {
+                _state.update { it.copy(selectedRun = action.run) }
             }
         }
     }

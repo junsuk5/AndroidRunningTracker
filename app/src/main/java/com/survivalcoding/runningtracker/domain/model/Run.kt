@@ -6,5 +6,6 @@ data class Run(
     val timeInMillis: Long = 0L,
     val timestamp: Long = 0L,
     val avgSpeedInKMH: Float = 0f,
-    val caloriesBurned: Int = 0
+    val caloriesBurned: Int = 0,
+    val pathPoints: List<LocationPoint> = emptyList()
 )

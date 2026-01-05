@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -87,7 +88,7 @@ fun MainScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(AppTheme.colors.surface)
             ) {
-                mapRenderer.DrawMap(pathPoints = state.trackingState.pathPoints.toImmutableList())
+                mapRenderer.DrawMap(pathPoints = state.displayPathPoints)
             }
 
             Spacer(modifier = Modifier.height(AppTheme.spacing.normal))
@@ -108,7 +109,8 @@ fun MainScreen(
                 items(state.runs) { run ->
                     RunItem(
                         run = run,
-                        onDelete = { onAction(MainAction.DeleteRun(run)) }
+                        onDelete = { onAction(MainAction.DeleteRun(run)) },
+                        onSelect = { onAction(MainAction.SelectRun(run)) }
                     )
                 }
             }
@@ -196,9 +198,12 @@ fun SortTypeSelector(
 fun RunItem(
     run: Run,
     onDelete: () -> Unit,
+    onSelect: () -> Unit,
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelect() },
         colors = CardDefaults.cardColors(
             containerColor = AppTheme.colors.surface,
             contentColor = AppTheme.colors.onSurface
