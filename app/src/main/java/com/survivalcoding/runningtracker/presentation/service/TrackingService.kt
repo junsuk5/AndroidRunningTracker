@@ -15,10 +15,12 @@ import com.survivalcoding.runningtracker.domain.location.LocationClient
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
 class TrackingService : Service() {
@@ -26,7 +28,11 @@ class TrackingService : Service() {
     private val trackingManager: TrackingManager by inject()
     private val locationClient: LocationClient by inject()
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var locationJob: kotlinx.coroutines.Job? = null
+    private var locationJob: Job? = null
+    private var timerJob: Job? = null
+    private var timeStarted = 0L
+    private var lapTime = 0L
+    private var totalTime = 0L
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -70,6 +76,19 @@ class TrackingService : Service() {
         startForeground(NOTIFICATION_ID, notification)
         trackingManager.updateTrackingState(true)
         startLocationTracking()
+        startTimer()
+    }
+
+    private fun startTimer() {
+        timeStarted = System.currentTimeMillis()
+        timerJob?.cancel()
+        timerJob = serviceScope.launch(Dispatchers.Main) {
+            while (true) {
+                lapTime = System.currentTimeMillis() - timeStarted
+                trackingManager.updateTime(totalTime + lapTime)
+                kotlinx.coroutines.delay(50L)
+            }
+        }
     }
 
     private fun startLocationTracking() {
@@ -83,7 +102,11 @@ class TrackingService : Service() {
 
     private fun stopForegroundService() {
         locationJob?.cancel()
+        timerJob?.cancel()
+        totalTime += lapTime
         trackingManager.updateTrackingState(false)
+        totalTime = 0L
+        lapTime = 0L
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
