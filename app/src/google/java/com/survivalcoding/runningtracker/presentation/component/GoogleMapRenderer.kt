@@ -11,10 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
+import kotlinx.collections.immutable.ImmutableList
 
 class GoogleMapRenderer : MapRenderer {
     @Composable
-    override fun DrawMap(pathPoints: List<LocationPoint>) {
+    override fun DrawMap(pathPoints: ImmutableList<LocationPoint>) {
         Box(
             modifier = Modifier
                 .fillMaxSize()

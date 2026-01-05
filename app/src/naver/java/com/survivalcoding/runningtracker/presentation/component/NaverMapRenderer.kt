@@ -1,6 +1,5 @@
 package com.survivalcoding.runningtracker.presentation.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,18 +25,34 @@ import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
 import com.naver.maps.map.NaverMap
+import com.naver.maps.map.overlay.ArrowheadPathOverlay
 import com.survivalcoding.runningtracker.BuildConfig
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
+import kotlinx.collections.immutable.ImmutableList
 
 class NaverMapRenderer : MapRenderer {
     @Composable
-    override fun DrawMap(pathPoints: List<LocationPoint>) {
+    override fun DrawMap(pathPoints: ImmutableList<LocationPoint>) {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
         var naverMap by remember { mutableStateOf<NaverMap?>(null) }
+        val arrowOverlay = remember { ArrowheadPathOverlay() }
         val mapView = remember {
             MapView(context).apply {
                 getMapAsync { naverMap = it }
+            }
+        }
+
+        // Arrow Overlay update
+        LaunchedEffect(pathPoints, naverMap) {
+            val map = naverMap ?: return@LaunchedEffect
+            if (pathPoints.size >= 2) {
+                arrowOverlay.coords = pathPoints.map { LatLng(it.latitude, it.longitude) }
+                arrowOverlay.color = android.graphics.Color.BLUE
+                arrowOverlay.outlineWidth = 2
+                arrowOverlay.map = map
+            } else {
+                arrowOverlay.map = null
             }
         }
 

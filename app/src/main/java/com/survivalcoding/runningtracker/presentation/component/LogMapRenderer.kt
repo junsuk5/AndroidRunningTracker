@@ -11,10 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
+import kotlinx.collections.immutable.ImmutableList
 
 class LogMapRenderer : MapRenderer {
     @Composable
-    override fun DrawMap(pathPoints: List<LocationPoint>) {
+    override fun DrawMap(pathPoints: ImmutableList<LocationPoint>) {
         // 로그 출력
         Log.d("LogMapRenderer", "Total path points: ${pathPoints.size}")
         if (pathPoints.isNotEmpty()) {

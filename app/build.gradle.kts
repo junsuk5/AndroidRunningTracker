@@ -105,6 +105,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+    implementation(libs.kotlinx.collections.immutable)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

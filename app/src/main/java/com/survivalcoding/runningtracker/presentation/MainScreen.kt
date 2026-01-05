@@ -44,12 +44,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.survivalcoding.runningtracker.domain.model.LocationPoint
 import com.survivalcoding.runningtracker.domain.model.Run
 import com.survivalcoding.runningtracker.presentation.component.MapRenderer
 import com.survivalcoding.runningtracker.presentation.component.NopMapRenderer
 import com.survivalcoding.runningtracker.presentation.designsystem.AppTheme
 import com.survivalcoding.runningtracker.presentation.designsystem.RunningTrackerTheme
 import com.survivalcoding.runningtracker.presentation.service.TrackingState
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import java.util.concurrent.TimeUnit
 
 @Composable
@@ -84,7 +87,7 @@ fun MainScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(AppTheme.colors.surface)
             ) {
-                mapRenderer.DrawMap(pathPoints = state.trackingState.pathPoints)
+                mapRenderer.DrawMap(pathPoints = state.trackingState.pathPoints.toImmutableList())
             }
 
             Spacer(modifier = Modifier.height(AppTheme.spacing.normal))
