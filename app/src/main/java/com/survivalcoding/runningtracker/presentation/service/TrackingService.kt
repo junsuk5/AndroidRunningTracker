@@ -26,6 +26,7 @@ class TrackingService : Service() {
     private val trackingManager: TrackingManager by inject()
     private val locationClient: LocationClient by inject()
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var locationJob: kotlinx.coroutines.Job? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -72,17 +73,16 @@ class TrackingService : Service() {
     }
 
     private fun startLocationTracking() {
-        locationClient.getLocationUpdates(1000L) // 1초 간격
+        locationJob?.cancel()
+        locationJob = locationClient.getLocationUpdates(1000L) // 1초 간격
             .onEach { point ->
                 trackingManager.addPathPoint(point)
-                // 임의의 거리 계산 (실제로는 이전 좌표와의 거리 누적)
-                // 여기서는 간단히 좌표가 들어올 때마다 1미터씩 증가한다고 가정하거나 생략 가능
-                // trackingManager.updateDistance(...)
             }
             .launchIn(serviceScope)
     }
 
     private fun stopForegroundService() {
+        locationJob?.cancel()
         trackingManager.updateTrackingState(false)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()

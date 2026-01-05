@@ -36,19 +36,9 @@ class MainViewModel(
     }
 
     private fun observeTrackingState() {
-        trackingManager.isTracking.onEach { isTracking ->
-            _state.update { it.copy(isTracking = isTracking) }
-        }.launchIn(viewModelScope)
-
-        trackingManager.distanceInMeters.onEach { distance ->
-            if (_state.value.isTracking) {
-                _state.update { it.copy(currentDistanceInMeters = distance) }
-            }
-        }.launchIn(viewModelScope)
-
-        trackingManager.timeInMillis.onEach { time ->
-            if (_state.value.isTracking) {
-                _state.update { it.copy(currentTimeInMillis = time) }
+        trackingManager.state.onEach { trackingState ->
+            _state.update { 
+                it.copy(trackingState = trackingState)
             }
         }.launchIn(viewModelScope)
     }
@@ -56,9 +46,9 @@ class MainViewModel(
     fun onAction(action: MainAction) {
         when (action) {
             is MainAction.ToggleRun -> {
-                val currentTrackingState = _state.value.isTracking
+                val isTracking = _state.value.trackingState.isTracking
                 viewModelScope.launch {
-                    if (!currentTrackingState) {
+                    if (!isTracking) {
                         _event.emit(MainEvent.StartService)
                     } else {
                         _event.emit(MainEvent.StopService)
@@ -66,18 +56,18 @@ class MainViewModel(
                 }
             }
             is MainAction.FinishRun -> {
-                val currentState = _state.value
+                val trackingState = _state.value.trackingState
                 val run = Run(
-                    distanceInMeters = currentState.currentDistanceInMeters,
-                    timeInMillis = currentState.currentTimeInMillis,
+                    distanceInMeters = trackingState.distanceInMeters,
+                    timeInMillis = trackingState.timeInMillis,
                     timestamp = System.currentTimeMillis(),
-                    avgSpeedInKMH = currentState.currentAvgSpeedInKMH,
-                    caloriesBurned = currentState.currentCaloriesBurned
+                    avgSpeedInKMH = trackingState.avgSpeedInKMH,
+                    caloriesBurned = trackingState.caloriesBurned
                 )
                 viewModelScope.launch {
+                    _event.emit(MainEvent.StopService)
                     saveRunUseCase(run)
                     _event.emit(MainEvent.RunSaved)
-                    _event.emit(MainEvent.StopService)
                 }
             }
             is MainAction.DeleteRun -> {
@@ -119,10 +109,10 @@ class MainViewModel(
         ) { distance, time, avgSpeed, calories ->
             _state.update {
                 it.copy(
-                    currentDistanceInMeters = distance,
-                    currentTimeInMillis = time,
-                    currentAvgSpeedInKMH = avgSpeed,
-                    currentCaloriesBurned = calories
+                    totalDistanceInMeters = distance,
+                    totalTimeInMillis = time,
+                    totalAvgSpeedInKMH = avgSpeed,
+                    totalCaloriesBurned = calories
                 )
             }
         }.launchIn(viewModelScope)

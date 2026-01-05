@@ -26,12 +26,14 @@ import androidx.compose.ui.unit.dp
 import com.survivalcoding.runningtracker.domain.model.Run
 import com.survivalcoding.runningtracker.presentation.designsystem.AppTheme
 import com.survivalcoding.runningtracker.presentation.designsystem.RunningTrackerTheme
+import com.survivalcoding.runningtracker.presentation.service.TrackingState
 import java.util.concurrent.TimeUnit
 
 @Composable
 fun MainScreen(
     state: MainState,
-    onAction: (MainAction) -> Unit
+    onAction: (MainAction) -> Unit,
+    mapRenderer: MapRenderer
 ) {
     Box(
         modifier = Modifier
@@ -51,12 +53,15 @@ fun MainScreen(
             
             Spacer(modifier = Modifier.height(AppTheme.spacing.normal))
             
-            // Map Placeholder
-            MapPlaceholder(modifier = Modifier
+            // Map Area (Renderer)
+            Box(modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
                 .clip(RoundedCornerShape(16.dp))
-            )
+                .background(AppTheme.colors.surface)
+            ) {
+                mapRenderer.DrawMap(pathPoints = state.trackingState.pathPoints)
+            }
             
             Spacer(modifier = Modifier.height(AppTheme.spacing.normal))
             
@@ -90,7 +95,7 @@ fun MainScreen(
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             TrackingOverlay(
-                state = state,
+                trackingState = state.trackingState,
                 onFinish = { onAction(MainAction.FinishRun) }
             )
         }
@@ -244,7 +249,7 @@ fun RunInfoRow(
 
 @Composable
 fun TrackingOverlay(
-    state: MainState,
+    trackingState: TrackingState,
     onFinish: () -> Unit
 ) {
     Surface(
@@ -270,7 +275,7 @@ fun TrackingOverlay(
             ) {
                 TrackingInfoItem(
                     label = "Distance",
-                    value = "${state.currentDistanceInMeters / 1000f} km"
+                    value = "${trackingState.distanceInMeters / 1000f} km"
                 )
                 VerticalDivider(
                     modifier = Modifier.height(32.dp),
@@ -278,7 +283,7 @@ fun TrackingOverlay(
                 )
                 TrackingInfoItem(
                     label = "Time",
-                    value = formatTime(state.currentTimeInMillis)
+                    value = formatTime(trackingState.timeInMillis)
                 )
             }
             
@@ -337,7 +342,8 @@ fun MainScreenPreview() {
                     Run(id = 2, distanceInMeters = 3000, timeInMillis = 1200000, timestamp = System.currentTimeMillis(), avgSpeedInKMH = 9f, caloriesBurned = 200)
                 )
             ),
-            onAction = {}
+            onAction = {},
+            mapRenderer = NopMapRenderer()
         )
     }
 }
@@ -348,12 +354,15 @@ fun MainScreenTrackingPreview() {
     RunningTrackerTheme {
         MainScreen(
             state = MainState(
-                isTracking = true,
-                currentDistanceInMeters = 1200,
-                currentTimeInMillis = 450000,
-                currentAvgSpeedInKMH = 9.6f
+                trackingState = TrackingState(
+                    isTracking = true,
+                    distanceInMeters = 1200,
+                    timeInMillis = 450000,
+                    avgSpeedInKMH = 9.6f
+                )
             ),
-            onAction = {}
+            onAction = {},
+            mapRenderer = NopMapRenderer()
         )
     }
 }

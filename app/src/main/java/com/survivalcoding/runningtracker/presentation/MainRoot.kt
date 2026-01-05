@@ -6,35 +6,39 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.*
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.*
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import com.survivalcoding.runningtracker.presentation.MainAction
-import com.survivalcoding.runningtracker.presentation.MainEvent
-import com.survivalcoding.runningtracker.presentation.MainScreen
-import com.survivalcoding.runningtracker.presentation.MainViewModel
 import com.survivalcoding.runningtracker.presentation.designsystem.AppTheme
 import com.survivalcoding.runningtracker.presentation.service.TrackingService
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 fun MainRoot(
-    viewModel: MainViewModel = koinViewModel()
+    viewModel: MainViewModel = koinViewModel(),
+    mapRenderer: MapRenderer = koinInject()
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -74,10 +78,10 @@ fun MainRoot(
         viewModel.event.collect { event ->
             when (event) {
                 is MainEvent.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(event.message)
+                    launch { snackbarHostState.showSnackbar(event.message) }
                 }
                 MainEvent.RunSaved -> {
-                    snackbarHostState.showSnackbar("운동 기록이 저장되었습니다.")
+                    launch { snackbarHostState.showSnackbar("운동 기록이 저장되었습니다.") }
                 }
                 is MainEvent.PermissionRequired -> {
                     // TODO: 권한 요청 로직 추가
@@ -136,7 +140,8 @@ fun MainRoot(
         Box(modifier = Modifier.padding(padding)) {
             MainScreen(
                 state = state,
-                onAction = viewModel::onAction
+                onAction = viewModel::onAction,
+                mapRenderer = mapRenderer
             )
         }
     }
