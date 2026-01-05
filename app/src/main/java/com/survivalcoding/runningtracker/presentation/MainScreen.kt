@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.survivalcoding.runningtracker.core.util.TimeFormatter
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
 import com.survivalcoding.runningtracker.domain.model.Run
+import com.survivalcoding.runningtracker.domain.model.SortType
 import com.survivalcoding.runningtracker.presentation.component.MapRenderer
 import com.survivalcoding.runningtracker.presentation.component.NopMapRenderer
 import com.survivalcoding.runningtracker.presentation.designsystem.AppTheme

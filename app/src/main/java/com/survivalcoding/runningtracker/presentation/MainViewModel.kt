@@ -3,6 +3,7 @@ package com.survivalcoding.runningtracker.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.survivalcoding.runningtracker.domain.model.Run
+import com.survivalcoding.runningtracker.domain.model.SortType
 import com.survivalcoding.runningtracker.domain.use_case.*
 import com.survivalcoding.runningtracker.presentation.service.TrackingManager
 import kotlinx.coroutines.Job
@@ -99,7 +100,7 @@ class MainViewModel(
             SortType.DISTANCE -> getRunsSortedByDistanceUseCase()
             SortType.RUNNING_TIME -> getRunsSortedByTimeInMillisUseCase()
             SortType.AVG_SPEED -> getRunsSortedByAvgSpeedUseCase()
-            SortType.CALORIES -> getRunsSortedByCaloriesBurnedUseCase()
+            SortType.CALORIES_BURNED -> getRunsSortedByCaloriesBurnedUseCase()
         }
 
         getRunsJob = runsFlow.onEach { runs ->
