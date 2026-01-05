@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,11 +40,25 @@ import org.koin.compose.koinInject
 @Composable
 fun MainRoot(
     viewModel: MainViewModel = koinViewModel(),
-    mapRenderer: MapRenderer = koinInject()
+    mapRenderer: MapRenderer = koinInject(),
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    // 운동 중 화면 꺼짐 방지 처리
+    DisposableEffect(state.isTracking) {
+        val activity = context as? android.app.Activity
+        if (state.isTracking) {
+            activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        onDispose {
+            // 앱이 종료되거나 컴포저블이 소멸될 때 안전하게 해제
+            activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
 
     val permissions = mutableListOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -81,15 +96,21 @@ fun MainRoot(
                 is MainEvent.ShowSnackbar -> {
                     launch { snackbarHostState.showSnackbar(event.message) }
                 }
+
                 MainEvent.RunSaved -> {
                     launch { snackbarHostState.showSnackbar("운동 기록이 저장되었습니다.") }
                 }
+
                 is MainEvent.PermissionRequired -> {
                     // TODO: 권한 요청 로직 추가
                 }
+
                 MainEvent.StartService -> {
                     val hasAllPermissions = permissions.all {
-                        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            it
+                        ) == PackageManager.PERMISSION_GRANTED
                     }
 
                     if (hasAllPermissions) {
@@ -105,6 +126,7 @@ fun MainRoot(
                         permissionLauncher.launch(permissions.toTypedArray())
                     }
                 }
+
                 MainEvent.StopService -> {
                     val intent = Intent(context, TrackingService::class.java).apply {
                         action = TrackingService.ACTION_STOP
