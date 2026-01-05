@@ -1,17 +1,32 @@
 package com.survivalcoding.runningtracker.presentation.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.CameraAnimation
+import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
+import com.naver.maps.map.NaverMap
+import com.survivalcoding.runningtracker.BuildConfig
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
 
 class NaverMapRenderer : MapRenderer {
@@ -19,7 +34,24 @@ class NaverMapRenderer : MapRenderer {
     override fun DrawMap(pathPoints: List<LocationPoint>) {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
-        val mapView = remember { MapView(context) }
+        var naverMap by remember { mutableStateOf<NaverMap?>(null) }
+        val mapView = remember {
+            MapView(context).apply {
+                getMapAsync { naverMap = it }
+            }
+        }
+
+        // Camera move to last point
+        LaunchedEffect(pathPoints) {
+            val lastPoint = pathPoints.lastOrNull() ?: return@LaunchedEffect
+            val map = naverMap ?: return@LaunchedEffect
+
+            val cameraUpdate = CameraUpdate.scrollTo(
+                LatLng(lastPoint.latitude, lastPoint.longitude)
+            ).animate(CameraAnimation.Easing)
+
+            map.moveCamera(cameraUpdate)
+        }
 
         // Lifecycle management for MapView
         DisposableEffect(lifecycleOwner) {
@@ -45,6 +77,20 @@ class NaverMapRenderer : MapRenderer {
                 factory = { mapView },
                 modifier = Modifier.fillMaxSize()
             )
+
+            if (BuildConfig.FLAVOR.contains("staging")) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Naver Maps Ready\nPoints: ${pathPoints.size}",
+                        color = Color.Black,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
         }
     }
 }
