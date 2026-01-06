@@ -24,12 +24,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.survivalcoding.runningtracker.presentation.component.MapRenderer
 import com.survivalcoding.runningtracker.presentation.designsystem.AppTheme
 import com.survivalcoding.runningtracker.presentation.service.TrackingService
@@ -42,7 +42,7 @@ fun MainRoot(
     viewModel: MainViewModel = koinViewModel(),
     mapRenderer: MapRenderer = koinInject(),
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
@@ -76,7 +76,7 @@ fun MainRoot(
         if (allGranted) {
             // GPS 상태 즉시 갱신 시도
             viewModel.onAction(MainAction.RefreshGpsStatus)
-            
+
             // 권한 승인 시 서비스 시작 (현재 트래킹 시도 중인 경우에만)
             if (state.trackingState.isTracking) {
                 val intent = Intent(context, TrackingService::class.java).apply {

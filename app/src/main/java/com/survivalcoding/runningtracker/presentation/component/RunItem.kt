@@ -39,8 +39,8 @@ import com.survivalcoding.runningtracker.presentation.designsystem.RunningTracke
 @Composable
 fun RunItem(
     run: Run,
-    onDelete: () -> Unit,
-    onSelect: () -> Unit,
+    onDelete: () -> Unit= {},
+    onSelect: () -> Unit= {},
     modifier: Modifier = Modifier,
 ) {
     Card(

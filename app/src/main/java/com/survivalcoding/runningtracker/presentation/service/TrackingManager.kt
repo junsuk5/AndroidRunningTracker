@@ -1,6 +1,7 @@
 package com.survivalcoding.runningtracker.presentation.service
 
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,7 @@ class TrackingManager {
     fun addPathPoint(point: LocationPoint) {
         _state.update {
             if (it.isTracking) {
-                it.copy(pathPoints = it.pathPoints + point)
+                it.copy(pathPoints = (it.pathPoints + point).toImmutableList())
             } else it
         }
     }

@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
 import com.survivalcoding.runningtracker.domain.model.Run
+import kotlinx.collections.immutable.toImmutableList
 
 @Entity(tableName = "runs")
 data class RunEntity(
@@ -23,7 +24,7 @@ data class RunEntity(
         timestamp = timestamp,
         avgSpeedInKMH = avgSpeedInKMH,
         caloriesBurned = caloriesBurned,
-        pathPoints = pathPoints
+        pathPoints = pathPoints.toImmutableList()
     )
 
     companion object {

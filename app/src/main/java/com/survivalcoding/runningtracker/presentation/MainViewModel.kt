@@ -15,6 +15,8 @@ import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByTimeInMi
 import com.survivalcoding.runningtracker.domain.use_case.GetTotalStatsUseCase
 import com.survivalcoding.runningtracker.domain.use_case.SaveRunUseCase
 import com.survivalcoding.runningtracker.presentation.service.TrackingManager
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +67,10 @@ class MainViewModel(
     private fun observeTrackingState() {
         trackingManager.state.onEach { trackingState ->
             _state.update {
-                it.copy(trackingState = trackingState)
+                it.copy(
+                    trackingState = trackingState,
+                    displayPathPoints = if (trackingState.isTracking) trackingState.pathPoints else it.displayPathPoints
+                )
             }
         }.launchIn(viewModelScope)
     }
@@ -125,7 +130,12 @@ class MainViewModel(
             }
 
             is MainAction.SelectRun -> {
-                _state.update { it.copy(selectedRun = action.run) }
+                _state.update {
+                    it.copy(
+                        selectedRun = action.run,
+                        displayPathPoints = if (!it.isTracking) action.run.pathPoints else it.displayPathPoints
+                    )
+                }
             }
 
             MainAction.ToggleGpsStatus -> {
@@ -148,7 +158,7 @@ class MainViewModel(
         }
 
         getRunsJob = runsFlow.onEach { runs ->
-            _state.update { it.copy(runs = runs) }
+            _state.update { it.copy(runs = runs.toImmutableList()) }
         }.launchIn(viewModelScope)
     }
 
