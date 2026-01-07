@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.survivalcoding.runningtracker.presentation.component.MapRenderer
@@ -47,16 +48,11 @@ fun MainRoot(
     val context = LocalContext.current
 
     // 운동 중 화면 꺼짐 방지 처리
+    val view = LocalView.current
     DisposableEffect(state.isTracking) {
-        val activity = context as? android.app.Activity
-        if (state.isTracking) {
-            activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        } else {
-            activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
+        view.keepScreenOn = state.isTracking
         onDispose {
-            // 앱이 종료되거나 컴포저블이 소멸될 때 안전하게 해제
-            activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            view.keepScreenOn = false
         }
     }
 
