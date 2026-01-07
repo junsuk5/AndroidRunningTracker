@@ -15,6 +15,8 @@ import com.survivalcoding.runningtracker.core.util.TrackingCalculator
 import com.survivalcoding.runningtracker.domain.location.LocationClient
 import com.survivalcoding.runningtracker.domain.battery.BatteryLevelProvider
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
+import com.survivalcoding.runningtracker.domain.model.Run
+import com.survivalcoding.runningtracker.domain.use_case.SaveRunUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,6 +33,7 @@ class TrackingService : Service() {
     private val trackingManager: TrackingManager by inject()
     private val locationClient: LocationClient by inject()
     private val batteryLevelProvider: BatteryLevelProvider by inject()
+    private val saveRunUseCase: SaveRunUseCase by inject()
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var locationJob: Job? = null
     private var timerJob: Job? = null
@@ -132,7 +135,10 @@ class TrackingService : Service() {
         batteryJob?.cancel()
         batteryJob = batteryLevelProvider.getBatteryLevel()
             .onEach { level ->
-                if (level <= 30 && !hasShownBatteryWarning) {
+                if (level <= 20) {
+                    finishAndSaveRun(level)
+                    batteryJob?.cancel()
+                } else if (level <= 30 && !hasShownBatteryWarning) {
                     showBatteryWarningNotification(level)
                     hasShownBatteryWarning = true
                 } else if (level > 30) {
@@ -140,6 +146,50 @@ class TrackingService : Service() {
                 }
             }
             .launchIn(serviceScope)
+    }
+
+    private fun finishAndSaveRun(level: Int) {
+        serviceScope.launch {
+            val trackingState = trackingManager.state.value
+            val run = Run(
+                distanceInMeters = trackingState.distanceInMeters,
+                timeInMillis = trackingState.timeInMillis,
+                timestamp = System.currentTimeMillis(),
+                avgSpeedInKMH = trackingState.avgSpeedInKMH,
+                caloriesBurned = trackingState.caloriesBurned,
+                pathPoints = trackingState.pathPoints
+            )
+            saveRunUseCase(run)
+
+            showAutoStopNotification(level)
+            stopForegroundService()
+        }
+    }
+
+    private fun showAutoStopNotification(level: Int) {
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            2,
+            notificationIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, ALERT_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("배터리 부족으로 자동 종료")
+            .setContentText("배터리 잔량이 ${level}% 이하로 떨어져 기록을 저장하고 종료했습니다.")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(AUTO_STOP_NOTIFICATION_ID, notification)
     }
  
     private fun showBatteryWarningNotification(level: Int) {
@@ -215,5 +265,6 @@ class TrackingService : Service() {
         const val ALERT_CHANNEL_NAME = "Alerts"
         const val NOTIFICATION_ID = 1
         const val BATTERY_NOTIFICATION_ID = 2
+        const val AUTO_STOP_NOTIFICATION_ID = 3
     }
 }
