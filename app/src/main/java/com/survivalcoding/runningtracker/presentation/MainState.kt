@@ -22,6 +22,7 @@ data class MainState(
     val totalAvgSpeedInKMH: Float = 0f,
     val totalCaloriesBurned: Int = 0,
     val isGpsMockingEnabled: Boolean = false,
+    val batteryLevel: Int = 100,
 ) {
     val isTracking: Boolean get() = trackingState.isTracking
 }

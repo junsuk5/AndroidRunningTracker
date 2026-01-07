@@ -8,14 +8,18 @@ import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByDistance
 import com.survivalcoding.runningtracker.domain.use_case.GetRunsSortedByTimeInMillisUseCase
 import com.survivalcoding.runningtracker.domain.use_case.GetTotalStatsUseCase
 import com.survivalcoding.runningtracker.domain.use_case.SaveRunUseCase
+import com.survivalcoding.runningtracker.data.battery.DefaultBatteryLevelProvider
+import com.survivalcoding.runningtracker.domain.battery.BatteryLevelProvider
 import com.survivalcoding.runningtracker.presentation.MainViewModel
 import com.survivalcoding.runningtracker.presentation.service.TrackingManager
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
     // Manager
     single { TrackingManager() }
+    single<BatteryLevelProvider> { DefaultBatteryLevelProvider(androidContext()) }
 
     // Use Cases
     factory { SaveRunUseCase(get()) }
@@ -30,6 +34,7 @@ val appModule = module {
     // ViewModel
     viewModel {
         MainViewModel(
+            get(),
             get(),
             get(),
             get(),

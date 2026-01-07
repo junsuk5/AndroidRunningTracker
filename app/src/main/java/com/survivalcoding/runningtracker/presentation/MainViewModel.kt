@@ -3,6 +3,7 @@ package com.survivalcoding.runningtracker.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.survivalcoding.runningtracker.data.location.MockGpsStatusProvider
+import com.survivalcoding.runningtracker.domain.battery.BatteryLevelProvider
 import com.survivalcoding.runningtracker.domain.location.GpsStatusProvider
 import com.survivalcoding.runningtracker.domain.model.Run
 import com.survivalcoding.runningtracker.domain.model.SortType
@@ -41,6 +42,7 @@ class MainViewModel(
     private val deleteRunUseCase: DeleteRunUseCase,
     private val trackingManager: TrackingManager,
     private val gpsStatusProvider: GpsStatusProvider,
+    private val batteryLevelProvider: BatteryLevelProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
@@ -57,6 +59,7 @@ class MainViewModel(
         getTotalStats()
         observeTrackingState()
         observeGpsStatus()
+        observeBatteryLevel()
 
         // GPS Mocking 활성화 여부 설정
         _state.update {
@@ -79,6 +82,12 @@ class MainViewModel(
         gpsStatusJob?.cancel()
         gpsStatusJob = gpsStatusProvider.observeGpsStatus().onEach { gpsStatus ->
             _state.update { it.copy(gpsStatus = gpsStatus) }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun observeBatteryLevel() {
+        batteryLevelProvider.getBatteryLevel().onEach { level ->
+            _state.update { it.copy(batteryLevel = level) }
         }.launchIn(viewModelScope)
     }
 
