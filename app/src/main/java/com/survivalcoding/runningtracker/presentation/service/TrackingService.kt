@@ -3,38 +3,36 @@ package com.survivalcoding.runningtracker.presentation.service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
 import com.survivalcoding.runningtracker.MainActivity
 import com.survivalcoding.runningtracker.R
 import com.survivalcoding.runningtracker.core.util.TrackingCalculator
-import com.survivalcoding.runningtracker.domain.location.LocationClient
 import com.survivalcoding.runningtracker.domain.battery.BatteryLevelProvider
+import com.survivalcoding.runningtracker.domain.location.LocationClient
 import com.survivalcoding.runningtracker.domain.model.LocationPoint
 import com.survivalcoding.runningtracker.domain.model.Run
 import com.survivalcoding.runningtracker.domain.use_case.SaveRunUseCase
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-class TrackingService : Service() {
+class TrackingService : LifecycleService() {
 
     private val trackingManager: TrackingManager by inject()
     private val locationClient: LocationClient by inject()
     private val batteryLevelProvider: BatteryLevelProvider by inject()
     private val saveRunUseCase: SaveRunUseCase by inject()
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     private var locationJob: Job? = null
     private var timerJob: Job? = null
     private var batteryJob: Job? = null
@@ -45,7 +43,7 @@ class TrackingService : Service() {
     private var lastLocation: LocationPoint? = null
     private var distanceInMeters = 0.0
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onBind(intent: Intent): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
@@ -57,7 +55,6 @@ class TrackingService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        serviceScope.cancel()
     }
 
     private fun startForegroundService() {
@@ -97,7 +94,7 @@ class TrackingService : Service() {
     private fun startTimer() {
         timeStarted = System.currentTimeMillis()
         timerJob?.cancel()
-        timerJob = serviceScope.launch(Dispatchers.Main) {
+        timerJob = lifecycleScope.launch(Dispatchers.Main) {
             while (true) {
                 lapTime = System.currentTimeMillis() - timeStarted
                 trackingManager.updateTime(totalTime + lapTime)
@@ -128,11 +125,11 @@ class TrackingService : Service() {
                 lastLocation = point
                 trackingManager.addPathPoint(point)
             }
-            .launchIn(serviceScope)
+            .launchIn(lifecycleScope)
     }
- 
+
     private var hasShownBatteryWarning = false
- 
+
     private fun startBatteryMonitoring() {
         batteryJob?.cancel()
         batteryJob = batteryLevelProvider.getBatteryLevel()
@@ -147,11 +144,11 @@ class TrackingService : Service() {
                     hasShownBatteryWarning = false
                 }
             }
-            .launchIn(serviceScope)
+            .launchIn(lifecycleScope)
     }
 
     private fun finishAndSaveRun(level: Int) {
-        serviceScope.launch {
+        lifecycleScope.launch {
             val trackingState = trackingManager.state.value
             val run = Run(
                 distanceInMeters = trackingState.distanceInMeters,
@@ -195,7 +192,7 @@ class TrackingService : Service() {
 
         notificationManager.notify(AUTO_STOP_NOTIFICATION_ID, notification)
     }
- 
+
     private fun showBatteryWarningNotification(level: Int) {
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
